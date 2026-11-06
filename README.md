@@ -36,6 +36,10 @@ curl -fsSL https://raw.githubusercontent.com/KKKKhazix/agent-autoloop/main/insta
 agent-autoloop try
 ```
 
+装好后直接打开本机看板：<http://127.0.0.1:3350/>。看板会显示需要你处理的卡片、正在运行的任务和最近完成的结果，也能在“规则”里新增、查看、编辑和删除自动任务；规则保存前会自动检查，页面每几秒刷新一次。
+
+命令行仍适合备份、密钥管理和脚本化操作；日常查看、回答和规则管理可以直接在看板完成。
+
 下面是在终端里的真实输出：
 
 ```text

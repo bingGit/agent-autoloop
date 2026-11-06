@@ -36,6 +36,10 @@ Then run a real loop with your own agent — ask, exit while it waits, make the 
 agent-autoloop try
 ```
 
+After installation, open the local dashboard at <http://127.0.0.1:3350/>. It shows items waiting for you, active work, and recent results. The Rules view can create, view, edit, and delete automated tasks, validating the configuration before saving it.
+
+The CLI remains useful for backups, key management, and scripting; the dashboard is the everyday place to inspect work, answer cards, and manage rules.
+
 > CLI output and default notification strings are still Chinese until they are translated. Sample CLI output in this README is that same text written in English.
 
 Here is the output from Codex in a non-interactive terminal, written in English:

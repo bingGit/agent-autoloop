@@ -20,7 +20,7 @@ export function serve(port: number, host = "127.0.0.1", { commit = "dev" }: { co
         signal: gone.signal,
         ...body,
       });
-      const answer = await runtime.handle(request);
+      const answer = (await runtime.dashboard(request)) ?? (await runtime.handle(request));
       // The rest of an unread body would be taken for the next request on this connection.
       if (!req.complete) res.setHeader("connection", "close");
       res.writeHead(answer.status, Object.fromEntries(answer.headers));

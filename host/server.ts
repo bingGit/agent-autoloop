@@ -7,6 +7,7 @@ import { loadPlugin } from "./plugins.ts";
 import * as hub from "./runtime.ts";
 import { AuthError, NotFound } from "../kernel/errors.ts";
 import { createHandler } from "../kernel/http.ts";
+import { createDashboardHandler } from "./dashboard.ts";
 
 /** Past this setTimeout fires at once. */
 const LONGEST_TIMER = 2147483647;
@@ -135,9 +136,17 @@ export function makeHandler(commit = "dev") {
     stream: logStream,
     adapt: adaptWebhook,
   });
+  const dashboard = createDashboardHandler({
+    state: () => hub.stateOf(Date.now()),
+    rules: hub.dashboardRules,
+    saveRules: hub.saveRules,
+    dispatch: hub.execute,
+    why: hub.why,
+  });
   fire();
   return {
     handle,
+    dashboard,
     close() {
       closed = true;
       clearTimeout(timer);

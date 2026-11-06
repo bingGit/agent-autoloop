@@ -6,7 +6,7 @@
 // a cookie or a sign-in opens anything; someone other than the owner reads everything, answers, resolves or stops; looking
 // at a card's link answers it; a card's words run as markup or the page loads a script; Enter in the text box picks the first
 // option; a card link answers more than its card; a webhook with a bad signature is taken, or one without an adapter; a
-// webhook's secret leaks into anything it returns; the owner's key opens the worker's door; a page other than a card's exists;
+// webhook's secret leaks into anything it returns; the owner's key opens the worker's door; the dashboard leaks its owner key;
 // a card's link still answers or shows the card after its week, or sends you to a command that doesn't work; a link opens
 // when no channel takes links.
 import assert from "node:assert/strict";
@@ -412,7 +412,8 @@ test("someone else's webhook goes through its source's adapter: signed, or not t
   assert.equal((await call("/v1/in/nowhere", { raw: items })).status, 404);
 });
 
-test("there's no other page: what's going on is read through the doors", async () => {
-  for (const path of ["/", "/index.html", "/app.js", "/style.css", "/../package.json"])
+test("the local dashboard is the only public page besides card links", async () => {
+  assert.equal((await call("/")).status, 200);
+  for (const path of ["/index.html", "/app.js", "/style.css", "/../package.json"])
     assert.equal((await call(path)).status, 404, path);
 });

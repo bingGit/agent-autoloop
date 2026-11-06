@@ -1,7 +1,7 @@
 // The hub on this machine: its database, the view kept from the log, the rules file, and one way to apply an input.
 // Importing this opens them all, which is why the checks that must survive a bad rules file import it late.
 import { randomBytes } from "node:crypto";
-import { chmodSync, existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { chmodSync, existsSync, mkdirSync, readFileSync, renameSync, statSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { DatabaseSync, type SQLInputValue } from "node:sqlite";
 import { HOME, RULES_FILE } from "./home.ts";
@@ -121,6 +121,28 @@ export const parseRules = (json: string, now = Date.now()) =>
 export { RulesError };
 export let rules = query.configuration(current);
 let loaded = { file: "", mtime: 0 };
+
+/** Rules exposed to the local console omit the synthetic schedule source. */
+export function dashboardRules() {
+  const copy = JSON.parse(JSON.stringify(rules));
+  delete copy.sources.schedule;
+  return copy;
+}
+
+export function saveRules(next: unknown) {
+  const text = JSON.stringify(next, null, 2);
+  const validated = checkRules(text, Date.now(), Intl.DateTimeFormat().resolvedOptions().timeZone);
+  if (JSON.stringify(validated) === JSON.stringify(rules)) return dashboardRules();
+  const temporary = `${RULES_FILE}.tmp`;
+  writeFileSync(temporary, `${text}\n`, { mode: 0o600 });
+  chmodSync(temporary, 0o600);
+  renameSync(temporary, RULES_FILE);
+  loaded = { file: "", mtime: 0 };
+  const result = reloadRules();
+  if (result.problem) throw new RulesError([result.problem]);
+  tick();
+  return dashboardRules();
+}
 
 export function reloadRules(file = RULES_FILE) {
   let mtime: number;
