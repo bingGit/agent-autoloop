@@ -93,6 +93,8 @@ test("dashboard exposes rule catalog with event explanations and constrained cho
   assert.ok(catalog.events.some((event: any) => event.type === "issues.opened"));
   assert.ok(catalog.events.some((event: any) => event.type === "try.*"));
   assert.ok(catalog.fields.some((field: any) => field.name === "parallel"));
+  assert.ok(Array.isArray(catalog.skills));
+  assert.ok(Array.isArray(catalog.directories));
 });
 
 test("dashboard rule edits preserve advanced routing fields", async () => {
