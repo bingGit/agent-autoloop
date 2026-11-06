@@ -55,6 +55,9 @@ test("dashboard serves a local page and protects its API with a session cookie",
   const { handler } = setup();
   const page = await handler(new Request("http://127.0.0.1:3350/"));
   assert.equal(page?.status, 200);
+  const html = await page?.clone().text();
+  assert.match(html ?? "", /managerMarkup/);
+  assert.match(html ?? "", /Payload URL/);
   const cookie = page?.headers.get("set-cookie");
   assert.match(cookie ?? "", /HttpOnly/);
   const state = await handler(new Request("http://127.0.0.1:3350/api/dashboard/state"));
