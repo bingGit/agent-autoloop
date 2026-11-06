@@ -95,6 +95,8 @@ test("dashboard exposes rule catalog with event explanations and constrained cho
   assert.ok(catalog.fields.some((field: any) => field.name === "parallel"));
   assert.ok(Array.isArray(catalog.skills));
   assert.ok(Array.isArray(catalog.directories));
+  assert.ok(catalog.channels.some((channel: any) => channel.id === "desktop"));
+  assert.ok(catalog.plugins.some((plugin: any) => plugin.name === "codex" && plugin.kinds.includes("agent")));
 });
 
 test("dashboard rule edits preserve advanced routing fields", async () => {
