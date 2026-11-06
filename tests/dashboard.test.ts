@@ -81,3 +81,46 @@ test("dashboard saves rules through its service boundary", async () => {
   assert.equal(response?.status, 200);
   assert.equal((context.saved as any).rules[0].name, "新的规则");
 });
+
+test("dashboard exposes rule catalog with event explanations and constrained choices", async () => {
+  const { handler } = setup();
+  const page = await handler(new Request("http://127.0.0.1:3350/"));
+  const cookie = page?.headers.get("set-cookie")!;
+  const response = await handler(new Request("http://127.0.0.1:3350/api/dashboard/catalog", { headers: { cookie } }));
+  assert.equal(response?.status, 200);
+  const catalog = await response!.json();
+  assert.deepEqual(catalog.enums.tell, ["needed", "always", "never"]);
+  assert.ok(catalog.events.some((event: any) => event.type === "issues.opened"));
+  assert.ok(catalog.events.some((event: any) => event.type === "try.*"));
+  assert.ok(catalog.fields.some((field: any) => field.name === "parallel"));
+});
+
+test("dashboard rule edits preserve advanced routing fields", async () => {
+  const context = setup();
+  const page = await context.handler(new Request("http://127.0.0.1:3350/"));
+  const cookie = page?.headers.get("set-cookie")!;
+  const next = {
+    ...rules,
+    rules: [
+      {
+        ...rules.rules[0],
+        tell: "always",
+        resume: true,
+        parallel: 2,
+        emits: { source: "local", types: ["feedback.new"] },
+      },
+    ],
+  };
+  const response = await context.handler(
+    new Request("http://127.0.0.1:3350/api/dashboard/rules", {
+      method: "PUT",
+      headers: { cookie, "content-type": "application/json" },
+      body: JSON.stringify(next),
+    }),
+  );
+  assert.equal(response?.status, 200);
+  assert.equal((context.saved as any).rules[0].tell, "always");
+  assert.equal((context.saved as any).rules[0].resume, true);
+  assert.equal((context.saved as any).rules[0].parallel, 2);
+  assert.deepEqual((context.saved as any).rules[0].emits, next.rules[0].emits);
+});
